@@ -1,27 +1,29 @@
-name: CI/CD Pipeline
+name: Website Quality Check
 
-# Trigger workflow on push to main branch
 on:
   push:
-    branches: [ "main" ]  # Change to your default branch if needed
+    branches: [ main ]
+  pull_request:
 
 jobs:
-  build-and-deploy:
+  lighthouse:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # 2. (Optional) List files to verify index.html exists
-    - name: List files
-      run: ls -la
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-    # 3. Deploy to GitHub Pages
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./   # index.html is in root
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
 
+      # Replace YOUR_SITE_URL with the website you want to test
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun \
+            --url=https://YOUR_SITE_URL \
+            --upload.target=temporary-public-storage
